@@ -1,0 +1,72 @@
+#!/usr/bin/python3
+# text2naf -- wrap a text in a raw NAF
+# Usage: e.g. "cat textfile | text2naf nl >naffile"
+# 20160304 Emiel van Miltenburg
+# 20160306 Paul Huygen
+
+import sys
+import argparse
+import datetime
+
+
+def naffile(text, lang, date, source, uri):
+     "Write text to a raw naf file."
+     file_start       = '<NAF xml:lang="{}" version="v3">'.format(lang)
+     nafheader_start  = '<nafHeader>'
+     if source != None:
+         sourceriedel='source="' + source + '"'
+     else:
+         sourceriedel=''
+     file_description = '<fileDesc {} date="{}" type="plain text" />'.format(sourceriedel, date)
+     nafheader_end    = '</nafHeader>'
+     contents_start   = '<raw><![CDATA['
+     contents_end     = ']]></raw>'
+     rawtext_part     = contents_start + text + contents_end
+     file_end         = '</NAF>'
+     return '\n'.join( [file_start
+                       , nafheader_start
+                       , file_description
+                       , nafheader_end
+                       , rawtext_part
+                       , file_end]
+                       )
+
+
+#
+# Arguments.
+# 1. Language
+# 2. Document source
+#
+parser = argparse.ArgumentParser(description='Wrap text in NAF.')
+parser.add_argument( '-l', '--naflang'
+                   ,  default='en'
+                   ,  help='Document language (eg. nl)'
+                   )
+parser.add_argument( '-s', '--source'
+                   ,  default=None
+                   ,  help='Document source.'
+                   )
+parser.add_argument( '-u', '--uri'
+                   ,  default=None
+                   ,  help='URI of document.'
+                   )
+parser.add_argument( '-p', '--public_id'
+                   ,  default=None
+                   ,  help='Public_ID of document.'
+                   )
+parser.add_argument( '-d', '--date'
+                   ,  default=datetime.datetime.now().isoformat()
+                   ,  help='Creation date of document.'
+                   )
+args = parser.parse_args()
+
+text=""        
+for line in sys.stdin:
+    if text=="":
+        text=line.strip()
+    else:
+        text = '/n'.join([text, line])
+
+naf=naffile(text, args.naflang, args.date, args.source, args.uri)
+
+print(naf)
