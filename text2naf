@@ -14,7 +14,7 @@ def _format_argument(label, value):
     if value == None:
         return ""
     else:
-        return label + "=" + value
+        return label + '="' + value + '"'
 
 
 def naffile(text, lang, date, uri, source, pubID):
@@ -22,8 +22,8 @@ def naffile(text, lang, date, uri, source, pubID):
      file_start       = '<NAF xml:lang="{}" version="v3">'.format(lang)
      nafheader_start  = '<nafHeader>'
 
-     file_description = '<fileDesc {} date="{}" type="plain text" />'.format( _format_argument("source", source)
-                                                                            , _format_argument("date", date)
+     file_description = '<fileDesc {} {} type="plain text" />'.format( _format_argument("source", source)
+                                                                            , _format_argument("creationtime", date)
                                                                             )
      Id_tag = '<public {} {}/>'.format(_format_argument("publicId", pubID),  _format_argument("uri", uri))
      nafheader_end    = '</nafHeader>'
@@ -34,6 +34,7 @@ def naffile(text, lang, date, uri, source, pubID):
      return '\n'.join( [file_start
                        , nafheader_start
                        , file_description
+                       , Id_tag
                        , nafheader_end
                        , rawtext_part
                        , file_end
