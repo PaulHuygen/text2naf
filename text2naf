@@ -9,15 +9,23 @@ import argparse
 import datetime
 
 
-def naffile(text, lang, date, source, uri):
+def _format_argument(label, value):
+    "Format a an argument in an XML tag."
+    if value == None:
+        return ""
+    else:
+        return label + "=" + value
+
+
+def naffile(text, lang, date, uri, source, pubID):
      "Write text to a raw naf file."
      file_start       = '<NAF xml:lang="{}" version="v3">'.format(lang)
      nafheader_start  = '<nafHeader>'
-     if source != None:
-         sourceriedel='source="' + source + '"'
-     else:
-         sourceriedel=''
-     file_description = '<fileDesc {} date="{}" type="plain text" />'.format(sourceriedel, date)
+
+     file_description = '<fileDesc {} date="{}" type="plain text" />'.format( _format_argument("source", source)
+                                                                            , _format_argument("date", date)
+                                                                            )
+     Id_tag = '<public {} {}/>'.format(_format_argument("publicId", pubID),  _format_argument("uri", uri))
      nafheader_end    = '</nafHeader>'
      contents_start   = '<raw><![CDATA['
      contents_end     = ']]></raw>'
@@ -28,15 +36,19 @@ def naffile(text, lang, date, source, uri):
                        , file_description
                        , nafheader_end
                        , rawtext_part
-                       , file_end]
-                       )
+                       , file_end
+                       ]
+                     )
 
 
 #
-# Arguments.
-# 1. Language
+# Optional arguments.
+# 1. Language (Default en)
 # 2. Document source
-#
+# 3. URI
+# 4. PublicID
+# 5. Date (Default now)
+
 parser = argparse.ArgumentParser(description='Wrap text in NAF.')
 parser.add_argument( '-l', '--naflang'
                    ,  default='en'
@@ -65,8 +77,8 @@ for line in sys.stdin:
     if text=="":
         text=line.strip()
     else:
-        text = '/n'.join([text, line])
+        text = '\n'.join([text, line])
 
-naf=naffile(text, args.naflang, args.date, args.source, args.uri)
+naf=naffile(text, args.naflang, args.date, args.uri, args.source, args.public_id)
 
 print(naf)
