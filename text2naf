@@ -76,9 +76,9 @@ args = parser.parse_args()
 text=""        
 for line in sys.stdin:
     if text=="":
-        text=line.strip()
+        text=line.rstrip('\n\r ')
     else:
-        text = '\n'.join([text, line])
+        text = '\n'.join([text, line.rstrip('\n\r ')])
 
 naf=naffile(text, args.naflang, args.date, args.uri, args.source, args.public_id)
 
